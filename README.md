@@ -1,59 +1,163 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# BiblioTech
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+BiblioTech es un sistema academico de biblioteca desarrollado con PHP/Laravel y MySQL para el curso **Pruebas y Calidad de Software**.
 
-## About Laravel
+El objetivo principal del proyecto no es construir una aplicacion grande, sino demostrar de forma ordenada distintos tipos de pruebas con PHPUnit:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Pruebas unitarias.
+- Pruebas de integracion.
+- Pruebas de humo.
+- Verificacion de regresion basica.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2 o superior.
+- Laravel 12.
+- PHPUnit.
+- MySQL/MariaDB con XAMPP.
+- Base principal: `bibliotech`.
+- Base de pruebas: `bibliotech_test`.
 
-## Learning Laravel
+## Modulos Cubiertos
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### HU01 - Registro y Validacion de Identidad
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Servicio: `app/Services/RegistroService.php`
 
-## Laravel Sponsors
+Casos cubiertos:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- CP01 - Registro valido de estudiante.
+- CP02 - Registro valido de docente.
+- CP03 - Rechazo por DNI que no coincide con codigo institucional.
+- CP04 - Rechazo por prefijo de rol invalido.
+- CP05 - Rechazo por gafete que no corresponde al rol institucional.
 
-### Premium Partners
+### HU02 - Gestion de Prestamos y Exclusividad
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Servicio: `app/Services/PrestamoService.php`
 
-## Contributing
+Casos cubiertos:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- CP06 - Estudiante recibe prestamo por 7 dias.
+- CP07 - Docente recibe prestamo por 14 dias.
+- CP08 - Rol invalido no puede recibir prestamo.
+- CP09 - Libro disponible puede ser prestado y cambia a `PRESTADO`.
+- CP10 - Libro ya prestado no puede volver a prestarse.
+- CP19 - Usuario penalizado no puede registrar un nuevo prestamo.
+- CP20 - Usuario habilitado despues de penalizacion si puede registrar prestamo.
 
-## Code of Conduct
+### HU03 - Morosidad, Pago y Penalizacion
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Servicio: `app/Services/MorosidadService.php`
 
-## Security Vulnerabilities
+Casos cubiertos:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- CP11 - Docente con 10 dias de retraso genera multa S/ 50.00.
+- CP12 - Estudiante con 10 dias de retraso genera multa S/ 20.00.
+- CP13 - Usuario sin retraso queda `AL_DIA` y multa 0.00.
+- CP14 - Rol invalido retorna `ERROR`.
+- CP15 - Pago de multa detiene la acumulacion de morosidad.
+- CP16 - Despues del pago inicia penalizacion de 21 dias.
+- CP17 - Usuario queda habilitado cuando termina la penalizacion.
+- CP18 - Pago de multa registra fecha, congela deuda e inicia penalizacion.
 
-## License
+### Smoke Test
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- CP21 - Verifica ruta base, servicios principales, modelos principales y tablas base.
+
+## Estructura Relevante
+
+```text
+app/Services
+  RegistroService.php
+  PrestamoService.php
+  MorosidadService.php
+
+app/Models
+  User.php
+  Libro.php
+  Prestamo.php
+  Pago.php
+
+tests/Unit
+  RegistroServiceTest.php
+  PrestamoServiceTest.php
+  MorosidadServiceTest.php
+
+tests/Feature
+  SmokeTest.php
+  PrestamoIntegrationTest.php
+  MorosidadIntegrationTest.php
+```
+
+## Configuracion de Pruebas
+
+La base de datos de testing esperada es:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=bibliotech_test
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Si `php` no esta en el PATH de Windows, puede agregarse temporalmente:
+
+```powershell
+$env:Path = "C:\xampp\php;$env:Path"
+```
+
+Para crear las bases:
+
+```powershell
+C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS bibliotech CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE DATABASE IF NOT EXISTS bibliotech_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+## Ejecutar Pruebas
+
+Limpiar configuracion:
+
+```powershell
+php artisan config:clear
+```
+
+Ejecutar toda la suite:
+
+```powershell
+php artisan test
+```
+
+Ejecutar pruebas por modulo:
+
+```powershell
+php artisan test --filter RegistroServiceTest
+php artisan test --filter PrestamoServiceTest
+php artisan test --filter MorosidadServiceTest
+php artisan test --filter PrestamoIntegrationTest
+php artisan test --filter MorosidadIntegrationTest
+php artisan test --filter SmokeTest
+```
+
+## Estado Actual
+
+La suite completa pasa correctamente con:
+
+```text
+Tests: 22 passed
+Assertions: 106
+```
+
+## Alcance Excluido
+
+Por decision academica y de alcance, este proyecto no implementa:
+
+- OCR.
+- Cypress.
+- Laravel Dusk.
+- Pasarelas de pago reales.
+- APIs externas.
+- Interfaz completa de usuario.
+
+El foco esta en demostrar calidad de software mediante pruebas claras, repetibles y defendibles.
