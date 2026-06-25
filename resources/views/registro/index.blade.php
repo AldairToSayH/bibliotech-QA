@@ -1,9 +1,12 @@
 @extends('layouts.app')
 
 @section('title', 'BiblioTech - Registro')
+@section('section-title', 'Registro')
 
 @section('content')
     @php
+        $puedeEditar = in_array(Auth::user()?->rol, ['admin', 'editor'], true);
+
         $casos = [
             [
                 'codigo' => 'CP01',
@@ -46,12 +49,13 @@
     <section class="panel">
         <h1 class="page-title">Registro y Validaci&oacute;n de Identidad</h1>
         <p class="page-description">
-            Formulario academico para validar DNI, codigo institucional y codigo de gafete usando
-            la logica probada en <strong>RegistroService</strong>.
+            Demuestra CP01-CP05 mediante validacion de identidad institucional usando
+            <strong>RegistroService</strong>.
         </p>
     </section>
 
     <section class="content-split">
+        @if ($puedeEditar)
         <div class="panel">
             <h2 style="margin-top: 0;">Datos del registro</h2>
             <p class="page-description">
@@ -150,6 +154,12 @@
                 @endif
             @endisset
         </div>
+        @else
+            <div class="panel">
+                <h2 style="margin-top: 0;">Modo lectura</h2>
+                <p class="page-description">Su rol permite consultar el modulo sin ejecutar validaciones.</p>
+            </div>
+        @endif
 
         <aside class="panel">
             <h2 style="margin-top: 0;">Casos de prueba r&aacute;pidos</h2>

@@ -15,8 +15,213 @@ El objetivo principal del proyecto no es construir una aplicacion grande, sino d
 - Laravel 12.
 - PHPUnit.
 - MySQL/MariaDB con XAMPP.
+- Composer.
 - Base principal: `bibliotech`.
 - Base de pruebas: `bibliotech_test`.
+
+## Manual de Ejecucion en Otro Dispositivo
+
+Esta guia asume Windows con XAMPP instalado. Tambien puede ejecutarse en otro entorno si tiene PHP, Composer y MySQL/MariaDB disponibles.
+
+### 1. Requisitos
+
+Instalar:
+
+- XAMPP actualizado, con Apache y MySQL/MariaDB.
+- Composer.
+- Git, si se clonara el repositorio desde control de versiones.
+
+Verificar versiones:
+
+```powershell
+php -v
+composer -V
+```
+
+Si Windows no reconoce `php`, agregar PHP de XAMPP al PATH temporal de la terminal:
+
+```powershell
+$env:Path = "C:\xampp\php;$env:Path"
+```
+
+### 2. Obtener el proyecto
+
+Opcion A, clonar con Git:
+
+```powershell
+git clone <URL_DEL_REPOSITORIO> bibliotech
+cd bibliotech
+```
+
+Opcion B, copiar carpeta:
+
+Copiar la carpeta del proyecto al nuevo equipo y abrir una terminal dentro de esa carpeta.
+
+### 3. Instalar dependencias PHP
+
+```powershell
+composer install
+```
+
+No copiar manualmente la carpeta `vendor`; Composer debe reconstruirla.
+
+### 4. Crear archivo de entorno
+
+Copiar el archivo de ejemplo:
+
+```powershell
+copy .env.example .env
+```
+
+Generar clave de aplicacion:
+
+```powershell
+php artisan key:generate
+```
+
+Configurar en `.env` la base principal:
+
+```env
+APP_NAME=BiblioTech
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=bibliotech
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+En XAMPP, por defecto el usuario suele ser `root` sin password.
+
+### 5. Iniciar XAMPP
+
+Abrir el panel de XAMPP e iniciar:
+
+- Apache.
+- MySQL.
+
+Si se trabajara solo con `php artisan serve`, Apache no es obligatorio, pero puede estar activo sin problema. MySQL si es necesario para migraciones, pruebas de integracion y pantallas con base de datos.
+
+### 6. Crear bases de datos
+
+Desde PowerShell:
+
+```powershell
+C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS bibliotech CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE DATABASE IF NOT EXISTS bibliotech_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Tambien puede hacerse desde phpMyAdmin creando:
+
+- `bibliotech`
+- `bibliotech_test`
+
+### 7. Ejecutar migraciones
+
+Migrar la base principal:
+
+```powershell
+php artisan migrate
+```
+
+Esto crea las tablas:
+
+- `users`
+- `libros`
+- `prestamos`
+- `pagos`
+
+### 8. Limpiar cache de configuracion
+
+```powershell
+php artisan config:clear
+php artisan cache:clear
+```
+
+### 9. Ejecutar pruebas
+
+```powershell
+php artisan test
+```
+
+Resultado esperado:
+
+```text
+Tests: 22 passed
+Assertions: 106
+```
+
+### 10. Levantar la aplicacion web
+
+```powershell
+php artisan serve
+```
+
+Abrir:
+
+```text
+http://127.0.0.1:8000
+```
+
+La primera pantalla es el login de administrador.
+
+Credenciales de demostracion:
+
+```text
+Correo: admin@bibliotech.test
+Contrasena: admin123
+```
+
+El usuario administrador demo se crea automaticamente si no existe.
+
+Rutas principales:
+
+- `http://127.0.0.1:8000/` - Login administrador
+- `http://127.0.0.1:8000/dashboard` - Dashboard protegido
+- `http://127.0.0.1:8000/registro`
+- `http://127.0.0.1:8000/libros`
+- `http://127.0.0.1:8000/prestamos`
+- `http://127.0.0.1:8000/morosidad`
+- `http://127.0.0.1:8000/pagos`
+- `http://127.0.0.1:8000/panel-pruebas`
+
+### 11. Solucion de Problemas Comunes
+
+Si aparece `php no se reconoce como comando`, usar:
+
+```powershell
+$env:Path = "C:\xampp\php;$env:Path"
+```
+
+Si aparece error de conexion MySQL:
+
+- Verificar que MySQL este iniciado en XAMPP.
+- Verificar que el puerto sea `3306`.
+- Verificar usuario `root` y password vacio en `.env` y `phpunit.xml`.
+- Ejecutar `php artisan config:clear`.
+
+Si faltan tablas:
+
+```powershell
+php artisan migrate
+```
+
+Si las pruebas de integracion fallan por base inexistente:
+
+```powershell
+C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE IF NOT EXISTS bibliotech_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+Si se desea reiniciar la base principal desde cero durante una practica:
+
+```powershell
+php artisan migrate:fresh
+```
+
+Advertencia: `migrate:fresh` borra y recrea las tablas de la base configurada.
 
 ## Modulos Cubiertos
 
@@ -158,6 +363,7 @@ Por decision academica y de alcance, este proyecto no implementa:
 - Laravel Dusk.
 - Pasarelas de pago reales.
 - APIs externas.
-- Interfaz completa de usuario.
+- Autenticacion.
+- Panel administrativo completo de produccion.
 
 El foco esta en demostrar calidad de software mediante pruebas claras, repetibles y defendibles.

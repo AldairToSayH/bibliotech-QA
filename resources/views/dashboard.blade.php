@@ -1,74 +1,87 @@
 @extends('layouts.app')
 
 @section('title', 'BiblioTech - Dashboard')
+@section('section-title', 'Dashboard')
 
 @section('content')
     <section class="panel">
-        <h1 class="page-title">Panel principal BiblioTech</h1>
-        <p class="page-description">
-            Vista general de los modulos usados para demostrar reglas de negocio, pruebas unitarias,
-            pruebas de integracion, humo y regresion basica con PHPUnit.
-        </p>
-
-        <div class="status">
-            <span>Pruebas pasadas:</span>
-            <span>CP01-CP21 validadas en la suite automatizada.</span>
-        </div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-description">Resumen operativo del sistema.</p>
     </section>
 
-    <section class="grid" aria-label="Modulos principales">
-        <article class="card">
-            <h2>Registro</h2>
-            <p>Validacion de identidad institucional para estudiantes y docentes.</p>
+    <section class="grid" aria-label="Indicadores principales">
+        <article class="card card-accent-green">
+            <h2>Libros</h2>
+            <p>Total registrado en el catalogo.</p>
             <div class="card-footer">
-                <a class="button" href="{{ route('registro.index') }}">Abrir modulo</a>
+                <span class="badge badge-blue">{{ $totalLibros }}</span>
+            </div>
+        </article>
+
+        <article class="card card-accent-green">
+            <h2>Disponibles</h2>
+            <p>Libros listos para prestamo.</p>
+            <div class="card-footer">
+                <span class="badge badge-green">{{ $librosDisponibles }}</span>
+            </div>
+        </article>
+
+        <article class="card card-accent-warn">
+            <h2>Prestamos activos</h2>
+            <p>Operaciones vigentes.</p>
+            <div class="card-footer">
+                <span class="badge badge-warn">{{ $prestamosActivos }}</span>
             </div>
         </article>
 
         <article class="card">
-            <h2>Libros y prestamos</h2>
-            <p>Disponibilidad de libros, registro de prestamos y exclusividad.</p>
+            <h2>Pagos</h2>
+            <p>Pagos registrados.</p>
             <div class="card-footer">
-                <a class="button" href="{{ route('libros.index') }}">Ver libros</a>
+                <span class="badge badge-blue">{{ $pagosRegistrados }}</span>
             </div>
         </article>
 
         <article class="card">
+            <h2>Usuarios</h2>
+            <p>Cuentas administradas.</p>
+            <div class="card-footer">
+                <span class="badge badge-blue">{{ $usuarios }}</span>
+            </div>
+        </article>
+
+        <article class="card card-accent-green">
+            <h2>Pruebas</h2>
+            <p>Suite automatizada.</p>
+            <div class="card-footer">
+                <span class="badge badge-green">22 passed</span>
+            </div>
+        </article>
+    </section>
+
+    <section class="grid" aria-label="Accesos rapidos">
+        <article class="card">
+            <h2>Libros</h2>
+            <p>Catalogo y disponibilidad.</p>
+            <div class="card-footer">
+                <a class="button" href="{{ route('libros.index') }}">Administrar</a>
+            </div>
+        </article>
+
+        <article class="card card-accent-warn">
             <h2>Prestamos</h2>
-            <p>Plazos por rol, control de estado y bloqueo por penalizacion activa.</p>
+            <p>Registro y control de prestamos.</p>
             <div class="card-footer">
-                <a class="button" href="{{ route('prestamos.index') }}">Gestionar</a>
+                <a class="button" href="{{ route('prestamos.index') }}">Administrar</a>
             </div>
         </article>
 
         <article class="card">
-            <h2>Morosidad</h2>
-            <p>Calculo de multa acumulada, estados de mora y reglas por rol.</p>
+            <h2>Pagos</h2>
+            <p>Pagos y penalizaciones.</p>
             <div class="card-footer">
-                <a class="button" href="{{ route('morosidad.index') }}">Consultar</a>
+                <a class="button" href="{{ route('pagos.index') }}">Administrar</a>
             </div>
         </article>
-
-        <article class="card">
-            <h2>Pagos y penalizacion</h2>
-            <p>Pago de multas, congelamiento de deuda y habilitacion posterior.</p>
-            <div class="card-footer">
-                <a class="button" href="{{ route('pagos.index') }}">Revisar</a>
-            </div>
-        </article>
-
-        <article class="card">
-            <h2>Panel de pruebas</h2>
-            <p>Resumen visual del alcance de pruebas implementadas en el proyecto.</p>
-            <div class="card-footer">
-                <a class="button" href="{{ route('pruebas.index') }}">Ver pruebas</a>
-            </div>
-        </article>
-    </section>
-
-    <section class="panel" style="margin-top: 18px;">
-        <p class="page-description">
-            Sistema preparado para demostrar pruebas unitarias, integracion, humo y regresion basica con PHPUnit.
-        </p>
     </section>
 @endsection

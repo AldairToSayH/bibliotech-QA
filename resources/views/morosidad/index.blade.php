@@ -1,9 +1,12 @@
 @extends('layouts.app')
 
 @section('title', 'BiblioTech - Morosidad')
+@section('section-title', 'Morosidad')
 
 @section('content')
     @php
+        $puedeEditar = in_array(Auth::user()?->rol, ['admin', 'editor'], true);
+
         $casos = [
             ['codigo' => 'CP11', 'titulo' => 'Docente moroso', 'detalle' => 'Rol: docente | Devolucion: 2026-06-15 | Actual: 2026-06-25 | Resultado: S/ 50.00, MOROSO'],
             ['codigo' => 'CP12', 'titulo' => 'Estudiante moroso', 'detalle' => 'Rol: estudiante | Devolucion: 2026-06-15 | Actual: 2026-06-25 | Resultado: S/ 20.00, MOROSO'],
@@ -36,11 +39,12 @@
     <section class="panel">
         <h1 class="page-title">Morosidad, Pago y Penalizaci&oacute;n</h1>
         <p class="page-description">
-            Pantalla academica para demostrar calculo de multas, corte de acumulacion por pago
-            y penalizacion posterior usando <strong>MorosidadService</strong>.
+            Demuestra CP11-CP17 mediante calculo de multa, pago y penalizacion usando
+            <strong>MorosidadService</strong>.
         </p>
     </section>
 
+    @if ($puedeEditar)
     <section class="content-split">
         <div style="display: grid; gap: 18px;">
             <section class="panel">
@@ -257,4 +261,26 @@
             </div>
         </aside>
     </section>
+    @else
+        <section class="content-split">
+            <div class="panel">
+                <h2 style="margin-top: 0;">Modo lectura</h2>
+                <p class="page-description">Su rol permite consultar reglas de morosidad sin ejecutar calculos ni modificar operaciones.</p>
+            </div>
+
+            <aside class="panel">
+                <h2 style="margin-top: 0;">Casos de prueba r&aacute;pidos</h2>
+                <p class="page-description">Datos guia para demostrar CP11-CP17 desde esta interfaz.</p>
+
+                <div class="case-grid">
+                    @foreach ($casos as $caso)
+                        <article class="case-card">
+                            <h3>{{ $caso['codigo'] }} - {{ $caso['titulo'] }}</h3>
+                            <p style="margin: 0;">{{ $caso['detalle'] }}</p>
+                        </article>
+                    @endforeach
+                </div>
+            </aside>
+        </section>
+    @endif
 @endsection

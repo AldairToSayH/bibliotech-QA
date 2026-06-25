@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
 class Prestamo extends Model
@@ -13,4 +14,14 @@ class Prestamo extends Model
         'fecha_devolucion',
         'estado',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function libro(): BelongsTo
+    {
+        return $this->belongsTo(Libro::class);
+    }
 }

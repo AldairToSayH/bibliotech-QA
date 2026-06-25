@@ -8,6 +8,8 @@
         :root {
             --bg: #f3f4f6;
             --surface: #ffffff;
+            --surface-dark: #111827;
+            --surface-dark-soft: #1f2937;
             --text: #111827;
             --muted: #6b7280;
             --line: #d1d5db;
@@ -17,6 +19,9 @@
             --green-soft: #dcfce7;
             --red: #b91c1c;
             --red-soft: #fee2e2;
+            --warn: #c2410c;
+            --warn-soft: #ffedd5;
+            --shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
         }
 
         * {
@@ -37,67 +42,182 @@
             text-decoration: none;
         }
 
-        .topbar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--line);
+        button,
+        input,
+        select {
+            font-family: inherit;
         }
 
-        .topbar-inner {
-            width: min(1120px, calc(100% - 32px));
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            padding: 16px 0;
+        .admin-shell {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            min-height: 100vh;
         }
 
-        .brand {
+        .sidebar {
+            background: var(--surface-dark);
+            color: #f9fafb;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            padding: 22px 16px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+
+        .sidebar-brand {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 18px;
+            padding: 0 6px 18px;
         }
 
         .brand-title {
+            display: block;
             font-size: 22px;
             font-weight: 700;
         }
 
         .brand-subtitle {
-            color: var(--muted);
+            color: #9ca3af;
+            display: block;
             font-size: 13px;
+            margin-top: 2px;
         }
 
-        .nav {
-            display: flex;
-            flex-wrap: wrap;
+        .sidebar-nav {
+            display: grid;
             gap: 8px;
-            justify-content: flex-end;
         }
 
         .nav-link {
-            border: 1px solid var(--line);
+            align-items: center;
+            background: transparent;
+            border: 0;
             border-radius: 8px;
-            color: #374151;
+            color: #d1d5db;
+            cursor: pointer;
+            display: flex;
             font-size: 14px;
-            padding: 8px 10px;
+            gap: 10px;
+            padding: 10px 12px;
+            text-align: left;
+            width: 100%;
         }
 
-        .nav-link:hover {
-            border-color: var(--blue);
-            color: var(--blue);
+        .nav-link:hover,
+        .nav-link.active {
+            background: var(--surface-dark-soft);
+            color: #ffffff;
+        }
+
+        .nav-link.active {
+            border-left: 4px solid var(--blue);
+            font-weight: 700;
+        }
+
+        .nav-icon {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            display: inline-flex;
+            height: 28px;
+            position: relative;
+            width: 28px;
+        }
+
+        .nav-icon::after {
+            background: #93c5fd;
+            border-radius: 999px;
+            content: "";
+            height: 8px;
+            left: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+        }
+
+        .nav-link.active .nav-icon {
+            background: #2563eb;
+            border-color: #60a5fa;
+        }
+
+        .nav-link.active .nav-icon::after {
+            background: #ffffff;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            margin-top: auto;
+            padding-top: 16px;
+        }
+
+        .admin-main {
+            min-width: 0;
+        }
+
+        .topbar {
+            align-items: center;
+            background: var(--surface);
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            min-height: 68px;
+            padding: 14px 28px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .hamburger {
+            align-items: center;
+            background: #f9fafb;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+            font-size: 22px;
+            height: 42px;
+            justify-content: center;
+            width: 42px;
+        }
+
+        .topbar-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .topbar-user {
+            color: var(--muted);
+            font-size: 14px;
         }
 
         .page {
-            width: min(1120px, calc(100% - 32px));
-            margin: 0 auto;
-            padding: 28px 0 48px;
+            padding: 28px;
+        }
+
+        .guest-shell {
+            align-items: center;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 28px;
+        }
+
+        .guest-card {
+            width: min(720px, 100%);
+        }
+
+        .menu-toggle {
+            display: none;
         }
 
         .panel {
             background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 8px;
+            box-shadow: var(--shadow);
             padding: 24px;
         }
 
@@ -123,11 +243,28 @@
             background: var(--surface);
             border: 1px solid var(--line);
             border-radius: 8px;
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            min-height: 190px;
+            min-height: 170px;
             padding: 20px;
+            position: relative;
         }
+
+        .card::before {
+            background: var(--blue);
+            border-radius: 8px 8px 0 0;
+            content: "";
+            height: 4px;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        .card-accent-green::before { background: var(--green); }
+        .card-accent-warn::before { background: #f97316; }
+        .card-accent-red::before { background: var(--red); }
 
         .card h2 {
             font-size: 18px;
@@ -143,22 +280,59 @@
             margin-top: auto;
         }
 
-        .button {
-            background: var(--blue);
-            border: 0;
+        .button,
+        .button-small,
+        .button-danger,
+        .button-secondary {
+            align-items: center;
             border-radius: 8px;
-            color: #ffffff;
             cursor: pointer;
             display: inline-flex;
             font: inherit;
             font-weight: 700;
             justify-content: center;
+            text-align: center;
+        }
+
+        .button {
+            background: var(--blue);
+            border: 0;
+            color: #ffffff;
             min-width: 132px;
             padding: 10px 14px;
         }
 
-        .button:hover {
-            background: var(--blue-dark);
+        .button:hover { background: var(--blue-dark); }
+
+        .button-secondary {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--blue);
+            padding: 9px 13px;
+        }
+
+        .button-secondary:hover { background: #dbeafe; }
+
+        .button-small {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: var(--blue);
+            font-size: 13px;
+            padding: 7px 10px;
+        }
+
+        .button-danger {
+            background: var(--red-soft);
+            border: 1px solid #fecaca;
+            color: var(--red);
+            font-size: 13px;
+            padding: 7px 10px;
+        }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .status {
@@ -172,14 +346,6 @@
             gap: 8px;
             margin-top: 20px;
             padding: 14px 16px;
-        }
-
-        .placeholder {
-            margin-top: 22px;
-        }
-
-        .placeholder strong {
-            color: var(--blue);
         }
 
         .content-split {
@@ -208,9 +374,9 @@
 
         .form-field input,
         .form-field select {
+            background: #ffffff;
             border: 1px solid var(--line);
             border-radius: 8px;
-            background: #ffffff;
             color: var(--text);
             font: inherit;
             min-height: 42px;
@@ -279,9 +445,9 @@
         }
 
         .result-warning {
-            background: #ffedd5;
+            background: var(--warn-soft);
             border: 1px solid #fed7aa;
-            color: #c2410c;
+            color: var(--warn);
         }
 
         .case-grid {
@@ -335,7 +501,7 @@
 
         .table {
             border-collapse: collapse;
-            min-width: 680px;
+            min-width: 760px;
             width: 100%;
         }
 
@@ -371,8 +537,8 @@
         }
 
         .badge-warn {
-            background: #ffedd5;
-            color: #c2410c;
+            background: var(--warn-soft);
+            color: var(--warn);
         }
 
         .badge-red {
@@ -394,14 +560,85 @@
             padding: 14px 16px;
         }
 
-        @media (max-width: 860px) {
-            .topbar-inner {
-                align-items: flex-start;
-                flex-direction: column;
+        .modal {
+            align-items: center;
+            background: rgba(15, 23, 42, 0.52);
+            bottom: 0;
+            display: none;
+            justify-content: center;
+            left: 0;
+            padding: 24px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 50;
+        }
+
+        .modal:target {
+            display: flex;
+        }
+
+        .modal-dialog {
+            background: var(--surface);
+            border-radius: 8px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+            padding: 24px;
+            width: min(720px, 100%);
+        }
+
+        .modal-header {
+            align-items: flex-start;
+            display: flex;
+            gap: 16px;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .modal-close {
+            align-items: center;
+            background: #f9fafb;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            color: var(--muted);
+            display: inline-flex;
+            font-weight: 700;
+            height: 36px;
+            justify-content: center;
+            width: 36px;
+        }
+
+        @media (max-width: 980px) {
+            .admin-shell {
+                grid-template-columns: 1fr;
             }
 
-            .nav {
-                justify-content: flex-start;
+            .hamburger {
+                display: inline-flex;
+            }
+
+            .sidebar {
+                bottom: 0;
+                height: auto;
+                left: 0;
+                max-width: 290px;
+                position: fixed;
+                top: 0;
+                transform: translateX(-100%);
+                transition: transform 0.2s ease;
+                width: 82vw;
+                z-index: 30;
+            }
+
+            .menu-toggle:checked ~ .admin-shell .sidebar {
+                transform: translateX(0);
             }
 
             .grid {
@@ -414,10 +651,12 @@
         }
 
         @media (max-width: 620px) {
-            .grid {
-                grid-template-columns: 1fr;
+            .page,
+            .guest-shell {
+                padding: 18px;
             }
 
+            .grid,
             .form-grid {
                 grid-template-columns: 1fr;
             }
@@ -425,31 +664,83 @@
             .page-title {
                 font-size: 24px;
             }
+
+            .topbar {
+                padding: 12px 18px;
+            }
         }
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-inner">
-            <a class="brand" href="{{ route('dashboard') }}">
-                <span class="brand-title">BiblioTech</span>
-                <span class="brand-subtitle">Biblioteca academica con pruebas PHPUnit</span>
-            </a>
+    @auth
+        <input class="menu-toggle" id="menu-toggle" type="checkbox">
 
-            <nav class="nav" aria-label="Navegacion principal">
-                <a class="nav-link" href="{{ route('dashboard') }}">Inicio</a>
-                <a class="nav-link" href="{{ route('registro.index') }}">Registro</a>
-                <a class="nav-link" href="{{ route('libros.index') }}">Libros</a>
-                <a class="nav-link" href="{{ route('prestamos.index') }}">Prestamos</a>
-                <a class="nav-link" href="{{ route('morosidad.index') }}">Morosidad</a>
-                <a class="nav-link" href="{{ route('pagos.index') }}">Pagos</a>
-                <a class="nav-link" href="{{ route('pruebas.index') }}">Pruebas</a>
-            </nav>
+        <div class="admin-shell">
+            <aside class="sidebar">
+                <a class="sidebar-brand" href="{{ route('dashboard') }}">
+                    <span class="brand-title">BiblioTech</span>
+                    <span class="brand-subtitle">Panel de administracion</span>
+                </a>
+
+                <nav class="sidebar-nav" aria-label="Menu principal">
+                    <a @class(['nav-link', 'active' => request()->routeIs('dashboard')]) href="{{ route('dashboard') }}">
+                        <span class="nav-icon"></span> Dashboard
+                    </a>
+                    <a @class(['nav-link', 'active' => request()->routeIs('registro.*')]) href="{{ route('registro.index') }}">
+                        <span class="nav-icon"></span> Registro
+                    </a>
+                    <a @class(['nav-link', 'active' => request()->routeIs('libros.*')]) href="{{ route('libros.index') }}">
+                        <span class="nav-icon"></span> Libros
+                    </a>
+                    <a @class(['nav-link', 'active' => request()->routeIs('prestamos.*')]) href="{{ route('prestamos.index') }}">
+                        <span class="nav-icon"></span> Prestamos
+                    </a>
+                    <a @class(['nav-link', 'active' => request()->routeIs('morosidad.*')]) href="{{ route('morosidad.index') }}">
+                        <span class="nav-icon"></span> Morosidad
+                    </a>
+                    <a @class(['nav-link', 'active' => request()->routeIs('pagos.*')]) href="{{ route('pagos.index') }}">
+                        <span class="nav-icon"></span> Pagos
+                    </a>
+                    <a @class(['nav-link', 'active' => request()->routeIs('pruebas.*')]) href="{{ route('pruebas.index') }}">
+                        <span class="nav-icon"></span> Panel de Pruebas
+                    </a>
+                    @if (Auth::user()?->rol === 'admin')
+                        <a @class(['nav-link', 'active' => request()->routeIs('admin.*')]) href="{{ route('admin.usuarios.index') }}">
+                            <span class="nav-icon"></span> Administracion
+                        </a>
+                    @endif
+                </nav>
+
+                <div class="sidebar-footer">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="nav-link" type="submit">
+                            <span class="nav-icon"></span> Cerrar sesion
+                        </button>
+                    </form>
+                </div>
+            </aside>
+
+            <div class="admin-main">
+                <header class="topbar">
+                    <label class="hamburger" for="menu-toggle" aria-label="Abrir menu">☰</label>
+                    <div>
+                        <div class="topbar-title">@yield('section-title', 'Panel de administracion')</div>
+                        <div class="topbar-user">{{ Auth::user()->name }}</div>
+                    </div>
+                </header>
+
+                <main class="page">
+                    @yield('content')
+                </main>
+            </div>
         </div>
-    </header>
-
-    <main class="page">
-        @yield('content')
-    </main>
+    @else
+        <main class="guest-shell">
+            <div class="guest-card">
+                @yield('content')
+            </div>
+        </main>
+    @endauth
 </body>
 </html>
