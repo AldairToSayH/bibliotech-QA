@@ -5,7 +5,7 @@
 
 @section('content')
     @php
-        $puedeEditar = in_array(Auth::user()?->rol, ['admin', 'editor'], true);
+        $puedeEditar = request()->is('admin/*') || in_array(Auth::user()?->rol, ['admin', 'editor'], true);
 
         $estadoBadge = function (?string $estado): string {
             return match ($estado) {

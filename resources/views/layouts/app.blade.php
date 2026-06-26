@@ -672,61 +672,110 @@
     </style>
 </head>
 <body>
-    @auth
+    @php
+        $segmentoPortal = request()->segment(1);
+        $esPortal = in_array($segmentoPortal, ['alumno', 'docente', 'admin'], true);
+        $esContextoPublico = request()->routeIs('public.*') || request()->routeIs('registro.*') || request()->routeIs('portal.login*');
+        $usuarioPortal = session('portal_user', []);
+        $nombrePortal = Auth::user()?->name
+            ?? ($usuarioPortal['name'] ?? ($segmentoPortal === 'admin' ? 'Administrador' : 'Visitante'));
+
+        $portalHome = match ($segmentoPortal) {
+            'alumno' => route('alumno.dashboard'),
+            'docente' => route('docente.dashboard'),
+            'admin' => route('admin.dashboard'),
+            default => route('public.home'),
+        };
+
+        $portalSubtitulo = match ($segmentoPortal) {
+            'alumno' => 'Portal del alumno',
+            'docente' => 'Portal docente',
+            'admin' => 'Administracion',
+            default => 'Biblioteca Principal',
+        };
+    @endphp
+
+    @if (!$esContextoPublico && (Auth::check() || $esPortal))
         <input class="menu-toggle" id="menu-toggle" type="checkbox">
 
         <div class="admin-shell">
             <aside class="sidebar">
-                <a class="sidebar-brand" href="{{ route('dashboard') }}">
+                <a class="sidebar-brand" href="{{ $portalHome }}">
                     <span class="brand-title">BiblioTech</span>
-                    <span class="brand-subtitle">Panel de administracion</span>
+                    <span class="brand-subtitle">{{ $portalSubtitulo }}</span>
                 </a>
 
                 <nav class="sidebar-nav" aria-label="Menu principal">
-                    <a @class(['nav-link', 'active' => request()->routeIs('dashboard')]) href="{{ route('dashboard') }}">
-                        <span class="nav-icon"></span> Dashboard
-                    </a>
-                    <a @class(['nav-link', 'active' => request()->routeIs('registro.*')]) href="{{ route('registro.index') }}">
-                        <span class="nav-icon"></span> Registro
-                    </a>
-                    <a @class(['nav-link', 'active' => request()->routeIs('libros.*')]) href="{{ route('libros.index') }}">
-                        <span class="nav-icon"></span> Libros
-                    </a>
-                    <a @class(['nav-link', 'active' => request()->routeIs('prestamos.*')]) href="{{ route('prestamos.index') }}">
-                        <span class="nav-icon"></span> Prestamos
-                    </a>
-                    <a @class(['nav-link', 'active' => request()->routeIs('morosidad.*')]) href="{{ route('morosidad.index') }}">
-                        <span class="nav-icon"></span> Morosidad
-                    </a>
-                    <a @class(['nav-link', 'active' => request()->routeIs('pagos.*')]) href="{{ route('pagos.index') }}">
-                        <span class="nav-icon"></span> Pagos
-                    </a>
-                    <a @class(['nav-link', 'active' => request()->routeIs('pruebas.*')]) href="{{ route('pruebas.index') }}">
-                        <span class="nav-icon"></span> Panel de Pruebas
-                    </a>
-                    @if (Auth::user()?->rol === 'admin')
-                        <a @class(['nav-link', 'active' => request()->routeIs('admin.*')]) href="{{ route('admin.usuarios.index') }}">
-                            <span class="nav-icon"></span> Administracion
+                    @if ($segmentoPortal === 'alumno')
+                        <a @class(['nav-link', 'active' => request()->routeIs('alumno.dashboard')]) href="{{ route('alumno.dashboard') }}">
+                            <span class="nav-icon"></span> Dashboard
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('alumno.catalogo')]) href="{{ route('alumno.catalogo') }}">
+                            <span class="nav-icon"></span> Catalogo
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('alumno.estado-cuenta')]) href="{{ route('alumno.estado-cuenta') }}">
+                            <span class="nav-icon"></span> Estado de cuenta
+                        </a>
+                    @elseif ($segmentoPortal === 'docente')
+                        <a @class(['nav-link', 'active' => request()->routeIs('docente.dashboard')]) href="{{ route('docente.dashboard') }}">
+                            <span class="nav-icon"></span> Dashboard
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('docente.catalogo')]) href="{{ route('docente.catalogo') }}">
+                            <span class="nav-icon"></span> Catalogo
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('docente.estado-cuenta')]) href="{{ route('docente.estado-cuenta') }}">
+                            <span class="nav-icon"></span> Estado de cuenta
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('docente.pagar-deuda')]) href="{{ route('docente.pagar-deuda') }}">
+                            <span class="nav-icon"></span> Pagar deuda
+                        </a>
+                    @else
+                        <a @class(['nav-link', 'active' => request()->routeIs('admin.dashboard') || request()->routeIs('dashboard')]) href="{{ route('admin.dashboard') }}">
+                            <span class="nav-icon"></span> Dashboard
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('admin.usuarios.*')]) href="{{ route('admin.usuarios.index') }}">
+                            <span class="nav-icon"></span> Usuarios
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('libros.*')]) href="{{ route('libros.index') }}">
+                            <span class="nav-icon"></span> Libros
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('prestamos.*')]) href="{{ route('prestamos.index') }}">
+                            <span class="nav-icon"></span> Prestamos
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('morosidad.*')]) href="{{ route('morosidad.index') }}">
+                            <span class="nav-icon"></span> Morosidad
+                        </a>
+                        <a @class(['nav-link', 'active' => request()->routeIs('pagos.*')]) href="{{ route('pagos.index') }}">
+                            <span class="nav-icon"></span> Pagos
                         </a>
                     @endif
                 </nav>
 
                 <div class="sidebar-footer">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button class="nav-link" type="submit">
-                            <span class="nav-icon"></span> Cerrar sesion
-                        </button>
-                    </form>
+                    @if (Auth::check())
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="nav-link" type="submit">
+                                <span class="nav-icon"></span> Cerrar sesion
+                            </button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('portal.logout') }}">
+                            @csrf
+                            <button class="nav-link" type="submit">
+                                <span class="nav-icon"></span> Salir
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </aside>
 
             <div class="admin-main">
                 <header class="topbar">
-                    <label class="hamburger" for="menu-toggle" aria-label="Abrir menu">☰</label>
+                    <label class="hamburger" for="menu-toggle" aria-label="Abrir menu">&#9776;</label>
                     <div>
                         <div class="topbar-title">@yield('section-title', 'Panel de administracion')</div>
-                        <div class="topbar-user">{{ Auth::user()->name }}</div>
+                        <div class="topbar-user">{{ $nombrePortal }}</div>
                     </div>
                 </header>
 
@@ -738,9 +787,14 @@
     @else
         <main class="guest-shell">
             <div class="guest-card">
+                <nav class="action-row" style="margin-bottom: 18px;">
+                    <a class="button-secondary" href="{{ route('portal.login') }}">Login</a>
+                    <a class="button-secondary" href="{{ route('registro.index') }}">Registrarse</a>
+                    <a class="button" href="{{ route('login') }}">Acceso Admin</a>
+                </nav>
                 @yield('content')
             </div>
         </main>
-    @endauth
+    @endif
 </body>
 </html>

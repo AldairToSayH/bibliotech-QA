@@ -5,15 +5,7 @@
 
 @section('content')
     @php
-        $puedeEditar = in_array(Auth::user()?->rol, ['admin', 'editor'], true);
-
-        $casos = [
-            ['codigo' => 'CP06', 'titulo' => 'Estudiante', 'detalle' => 'Rol: estudiante | Fecha: 2026-06-25 | Devuelve: 2026-07-02'],
-            ['codigo' => 'CP07', 'titulo' => 'Docente', 'detalle' => 'Rol: docente | Fecha: 2026-06-25 | Devuelve: 2026-07-09'],
-            ['codigo' => 'CP08', 'titulo' => 'Rol invalido', 'detalle' => 'Rol: invitado | Fecha: 2026-06-25 | Resultado: rechazado'],
-            ['codigo' => 'CP09', 'titulo' => 'Libro disponible', 'detalle' => 'Libro DISPONIBLE | Resultado: cambia a PRESTADO'],
-            ['codigo' => 'CP10', 'titulo' => 'Libro prestado', 'detalle' => 'Libro PRESTADO | Resultado: prestamo rechazado'],
-        ];
+        $puedeEditar = request()->is('admin/*') || in_array(Auth::user()?->rol, ['admin', 'editor'], true);
     @endphp
 
     <section class="panel">
@@ -38,7 +30,7 @@
     @if ($puedeEditar)
         <section class="content-split">
         <div class="panel">
-            <h2 style="margin-top: 0;">A. Calculadora de plazo de pr&eacute;stamo</h2>
+            <h2 style="margin-top: 0;">Calculadora de plazo de pr&eacute;stamo</h2>
             <p class="page-description">
                 Consulte la fecha de devolucion antes de registrar una operacion.
             </p>
@@ -50,7 +42,7 @@
                     <div class="form-field">
                         <label for="plazo_rol">Rol</label>
                         <select id="plazo_rol" name="rol">
-                            @foreach (['estudiante' => 'Estudiante', 'docente' => 'Docente', 'invitado' => 'Invitado'] as $valor => $texto)
+                            @foreach (['estudiante' => 'Estudiante', 'docente' => 'Docente'] as $valor => $texto)
                                 <option value="{{ $valor }}" @selected(old('rol', $datosPlazo['rol'] ?? 'estudiante') === $valor)>
                                     {{ $texto }}
                                 </option>
@@ -121,9 +113,9 @@
 
     @if ($puedeEditar)
     <section class="panel" id="prestamos-registrados" style="margin-top: 18px;">
-        <h2 style="margin-top: 0;">B. Registro de pr&eacute;stamo con libro real</h2>
+        <h2 style="margin-top: 0;">Registrar pr&eacute;stamo</h2>
         <p class="page-description">
-            Registre un prestamo asociado a un usuario y libro existentes.
+            Seleccione un usuario activo y un libro disponible. El plazo se calcula con el rol registrado del usuario.
         </p>
 
         <form method="POST" action="{{ route('prestamos.registrar') }}">
@@ -148,30 +140,16 @@
 
                 <div class="form-field">
                     <label for="registro_libro_id">Libro</label>
-                    <select id="registro_libro_id" name="libro_id" @disabled(!$tablasDisponibles || $libros->isEmpty())>
-                        @forelse ($libros as $libro)
+                    <select id="registro_libro_id" name="libro_id" @disabled(!$tablasDisponibles || $librosDisponibles->isEmpty())>
+                        @forelse ($librosDisponibles as $libro)
                             <option value="{{ $libro->id }}" @selected((string) old('libro_id', $datosRegistro['libro_id'] ?? '') === (string) $libro->id)>
-                                #{{ $libro->id }} - {{ $libro->titulo }} ({{ $libro->estado }})
+                                #{{ $libro->id }} - {{ $libro->titulo }}
                             </option>
                         @empty
-                            <option value="">No hay libros</option>
+                            <option value="">No hay libros disponibles</option>
                         @endforelse
                     </select>
                     @error('libro_id')
-                        <span class="error-text">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                <div class="form-field">
-                    <label for="registro_rol">Rol</label>
-                    <select id="registro_rol" name="rol">
-                        @foreach (['estudiante' => 'Estudiante', 'docente' => 'Docente', 'invitado' => 'Invitado'] as $valor => $texto)
-                            <option value="{{ $valor }}" @selected(old('rol', $datosRegistro['rol'] ?? 'estudiante') === $valor)>
-                                {{ $texto }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('rol')
                         <span class="error-text">{{ $message }}</span>
                     @enderror
                 </div>
@@ -191,7 +169,7 @@
             </div>
 
             <div class="form-actions">
-                <button class="button" type="submit" @disabled(!$tablasDisponibles || $usuarios->isEmpty() || $libros->isEmpty())>
+                <button class="button" type="submit" @disabled(!$tablasDisponibles || $usuarios->isEmpty() || $librosDisponibles->isEmpty())>
                     Registrar pr&eacute;stamo
                 </button>
             </div>
@@ -337,7 +315,7 @@
     @endif
 
     <section class="panel" style="margin-top: 18px;">
-        <h2 style="margin-top: 0;">Libros disponibles para demostraci&oacute;n</h2>
+        <h2 style="margin-top: 0;">Disponibilidad del catalogo</h2>
         <p class="page-description">Catalogo disponible para nuevas operaciones.</p>
 
         <div class="table-wrap">

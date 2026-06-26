@@ -10,7 +10,7 @@
 
             <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px;">
                 <span class="badge badge-blue">Laravel</span>
-                <span class="badge badge-green">PHPUnit</span>
+                <span class="badge badge-green">Biblioteca</span>
                 <span class="badge badge-warn">MySQL</span>
             </div>
         </article>

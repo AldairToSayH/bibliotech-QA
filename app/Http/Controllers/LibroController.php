@@ -51,6 +51,12 @@ class LibroController extends Controller
 
     public function destroy(Libro $libro)
     {
+        if ($libro->prestamos()->exists()) {
+            return redirect()
+                ->route('libros.index')
+                ->with('mensaje', 'No se puede eliminar un libro con historial de prestamos.');
+        }
+
         $libro->delete();
 
         return redirect()->route('libros.index')->with('mensaje', 'Libro eliminado correctamente.');
@@ -70,27 +76,6 @@ class LibroController extends Controller
                 'prestados' => 0,
                 'tablaDisponible' => false,
             ], $extra);
-        }
-
-        if (Libro::count() === 0) {
-            Libro::insert([
-                [
-                    'titulo' => 'Programacion en PHP',
-                    'autor' => 'Equipo BiblioTech',
-                    'isbn' => 'BT-PHP-001',
-                    'estado' => 'DISPONIBLE',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-                [
-                    'titulo' => 'Base de Datos con MySQL',
-                    'autor' => 'Equipo BiblioTech',
-                    'isbn' => 'BT-MYSQL-001',
-                    'estado' => 'PRESTADO',
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ],
-            ]);
         }
 
         $libros = Libro::withCount('prestamos')->orderBy('id')->get();

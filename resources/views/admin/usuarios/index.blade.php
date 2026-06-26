@@ -1,12 +1,50 @@
 @extends('layouts.app')
 
-@section('title', 'BiblioTech - Administracion')
-@section('section-title', 'Administracion')
+@section('title', 'BiblioTech - Admin Usuarios')
+@section('section-title', 'Usuarios')
 
 @section('content')
+    @php
+        $hoy = \Illuminate\Support\Carbon::today();
+
+        $estadoUsuario = function ($usuario) use ($hoy): string {
+            $pagoPenalizado = $usuario->pagos
+                ->where('estado', 'PENALIZADO')
+                ->sortByDesc('fecha_habilitacion')
+                ->first();
+
+            if ($pagoPenalizado && $pagoPenalizado->fecha_habilitacion && $hoy->lt(\Illuminate\Support\Carbon::parse($pagoPenalizado->fecha_habilitacion))) {
+                return 'PENALIZADO';
+            }
+
+            $tieneVencidos = $usuario->prestamos
+                ->whereIn('estado', ['ACTIVO', 'VENCIDO', 'PENALIZADO'])
+                ->filter(fn ($prestamo) => $prestamo->fecha_devolucion && \Illuminate\Support\Carbon::parse($prestamo->fecha_devolucion)->lt($hoy))
+                ->isNotEmpty();
+
+            return $tieneVencidos ? 'MOROSO' : 'ACTIVO';
+        };
+
+        $badgeEstado = fn (string $estado): string => match ($estado) {
+            'ACTIVO', 'HABILITADO' => 'badge-green',
+            'PENALIZADO' => 'badge-warn',
+            'MOROSO' => 'badge-red',
+            default => 'badge-blue',
+        };
+
+        $badgeRol = fn (?string $rol): string => match ($rol) {
+            'admin' => 'badge-blue',
+            'editor' => 'badge-warn',
+            'visualizador' => 'badge-green',
+            'docente' => 'badge-warn',
+            'estudiante' => 'badge-green',
+            default => 'badge-red',
+        };
+    @endphp
+
     <section class="panel">
-        <h1 class="page-title">Usuarios del panel</h1>
-        <p class="page-description">Gestion de accesos administrativos.</p>
+        <h1 class="page-title">Usuarios</h1>
+        <p class="page-description">Listado administrativo de alumnos, docentes y cuentas internas.</p>
     </section>
 
     @isset($mensaje)
@@ -17,7 +55,8 @@
 
     <section class="content-split">
         <article class="panel">
-            <h2 style="margin-top: 0;">Nuevo usuario</h2>
+            <h2 style="margin-top: 0;">Crear cuenta interna</h2>
+            <p class="page-description">Alta exclusiva para administradores, editores o visualizadores del panel.</p>
 
             <form method="POST" action="{{ route('admin.usuarios.store') }}">
                 @csrf
@@ -42,7 +81,7 @@
                     </div>
 
                     <div class="form-field">
-                        <label for="rol">Rol</label>
+                        <label for="rol">Rol interno</label>
                         <select id="rol" name="rol">
                             <option value="admin" @selected(old('rol') === 'admin')>Administrador</option>
                             <option value="editor" @selected(old('rol') === 'editor')>Editor</option>
@@ -53,25 +92,25 @@
                 </div>
 
                 <div class="form-actions">
-                    <button class="button" type="submit">Crear usuario</button>
+                    <button class="button" type="submit">Crear cuenta interna</button>
                 </div>
             </form>
         </article>
 
         <aside class="panel">
-            <h2 style="margin-top: 0;">Permisos</h2>
+            <h2 style="margin-top: 0;">Acciones futuras</h2>
             <div class="case-grid">
                 <article class="case-card">
-                    <h3>Administrador</h3>
-                    <p class="page-description">Gestiona usuarios y contenido.</p>
+                    <h3>Ver perfil</h3>
+                    <p class="page-description">Detalle de historial, prestamos y pagos por usuario.</p>
                 </article>
                 <article class="case-card">
-                    <h3>Editor</h3>
-                    <p class="page-description">Puede crear, editar y eliminar contenido.</p>
+                    <h3>Editar datos</h3>
+                    <p class="page-description">Correccion administrativa de correo, telefono o estado.</p>
                 </article>
                 <article class="case-card">
-                    <h3>Visualizador</h3>
-                    <p class="page-description">Solo puede consultar informacion.</p>
+                    <h3>Bloquear o habilitar</h3>
+                    <p class="page-description">Control manual de acceso a prestamos en una fase posterior.</p>
                 </article>
             </div>
         </aside>
@@ -88,84 +127,36 @@
                         <th>Nombre</th>
                         <th>Correo</th>
                         <th>Rol</th>
+                        <th>Codigo institucional</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($usuarios as $usuario)
+                    @forelse ($usuarios as $usuario)
+                        @php($estado = $estadoUsuario($usuario))
                         <tr>
                             <td>{{ $usuario->id }}</td>
-                            <td>{{ $usuario->name }}</td>
+                            <td><strong>{{ $usuario->name }}</strong></td>
                             <td>{{ $usuario->email }}</td>
-                            <td>
-                                <span class="badge {{ $usuario->rol === 'admin' ? 'badge-blue' : ($usuario->rol === 'editor' ? 'badge-warn' : 'badge-green') }}">
-                                    {{ strtoupper($usuario->rol) }}
-                                </span>
-                            </td>
+                            <td><span class="badge {{ $badgeRol($usuario->rol) }}">{{ strtoupper($usuario->rol ?? 'SIN ROL') }}</span></td>
+                            <td>{{ $usuario->codigo_institucion ?? 'No aplica' }}</td>
+                            <td><span class="badge {{ $badgeEstado($estado) }}">{{ $estado }}</span></td>
                             <td>
                                 <div class="action-row">
-                                    <a class="button-small" href="#editar-usuario-{{ $usuario->id }}">Editar</a>
-                                    <form method="POST" action="{{ route('admin.usuarios.destroy', $usuario) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="button-danger" type="submit">Eliminar</button>
-                                    </form>
+                                    <span class="button-small">Ver</span>
+                                    <span class="button-small">Editar</span>
+                                    <span class="button-secondary">Bloquear/Habilitar</span>
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7">No hay usuarios registrados.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </section>
-
-    @foreach ($usuarios as $usuario)
-        <section class="modal" id="editar-usuario-{{ $usuario->id }}" aria-label="Editar usuario {{ $usuario->id }}">
-            <div class="modal-dialog">
-                <div class="modal-header">
-                    <div>
-                        <h2 class="modal-title">Editar usuario</h2>
-                        <p class="page-description">{{ $usuario->name }}</p>
-                    </div>
-                    <a class="modal-close" href="#usuarios">X</a>
-                </div>
-
-                <form method="POST" action="{{ route('admin.usuarios.update', $usuario) }}">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="form-grid">
-                        <div class="form-field">
-                            <label for="usuario_name_{{ $usuario->id }}">Nombre</label>
-                            <input id="usuario_name_{{ $usuario->id }}" name="name" type="text" value="{{ old('name', $usuario->name) }}">
-                        </div>
-
-                        <div class="form-field">
-                            <label for="usuario_email_{{ $usuario->id }}">Correo</label>
-                            <input id="usuario_email_{{ $usuario->id }}" name="email" type="email" value="{{ old('email', $usuario->email) }}">
-                        </div>
-
-                        <div class="form-field">
-                            <label for="usuario_password_{{ $usuario->id }}">Nueva contrasena</label>
-                            <input id="usuario_password_{{ $usuario->id }}" name="password" type="password" placeholder="Dejar vacio para mantener">
-                        </div>
-
-                        <div class="form-field">
-                            <label for="usuario_rol_{{ $usuario->id }}">Rol</label>
-                            <select id="usuario_rol_{{ $usuario->id }}" name="rol">
-                                <option value="admin" @selected(old('rol', $usuario->rol) === 'admin')>Administrador</option>
-                                <option value="editor" @selected(old('rol', $usuario->rol) === 'editor')>Editor</option>
-                                <option value="visualizador" @selected(old('rol', $usuario->rol) === 'visualizador')>Visualizador</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-actions action-row">
-                        <button class="button" type="submit">Guardar cambios</button>
-                        <a class="button-secondary" href="#usuarios">Cancelar</a>
-                    </div>
-                </form>
-            </div>
-        </section>
-    @endforeach
 @endsection

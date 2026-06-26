@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,8 +9,6 @@ class AuthController extends Controller
 {
     public function index()
     {
-        $this->crearUsuariosDemoSiNoExisten();
-
         return view('auth.login');
     }
 
@@ -29,6 +26,7 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+        $request->session()->forget(['portal_user', 'portal_rol']);
 
         if (!in_array(Auth::user()?->rol, ['admin', 'editor', 'visualizador'], true)) {
             Auth::logout();
@@ -41,12 +39,13 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('admin.dashboard');
     }
 
     public function logout(Request $request)
     {
         Auth::logout();
+        $request->session()->forget(['portal_user', 'portal_rol']);
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
@@ -54,33 +53,4 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    private function crearUsuariosDemoSiNoExisten(): void
-    {
-        User::firstOrCreate(
-            ['email' => 'admin@bibliotech.test'],
-            [
-                'name' => 'Administrador BiblioTech',
-                'password' => 'admin123',
-                'rol' => 'admin',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'editor@bibliotech.test'],
-            [
-                'name' => 'Editor BiblioTech',
-                'password' => 'editor123',
-                'rol' => 'editor',
-            ]
-        );
-
-        User::firstOrCreate(
-            ['email' => 'visualizador@bibliotech.test'],
-            [
-                'name' => 'Visualizador BiblioTech',
-                'password' => 'viewer123',
-                'rol' => 'visualizador',
-            ]
-        );
-    }
 }

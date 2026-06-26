@@ -8,7 +8,7 @@
 <body>
     <main>
         <h1>BiblioTech</h1>
-        <p>Sistema base listo para pruebas con Laravel y PHPUnit.</p>
+        <p>Sistema administrativo de biblioteca para gestion de usuarios, libros, prestamos y pagos.</p>
     </main>
 </body>
 </html>

@@ -39,20 +39,21 @@ class PrestamoController extends Controller
         $datos = $request->validate([
             'user_id' => ['required', 'exists:users,id'],
             'libro_id' => ['required', 'exists:libros,id'],
-            'rol' => ['required', 'string'],
             'fecha_prestamo' => ['required', 'date'],
         ]);
 
-        $resultado = $prestamoService->registrarPrestamo(
+        $usuario = User::findOrFail($datos['user_id']);
+
+        $resultado = $prestamoService->registrarPrestamoValidandoPenalizacion(
             (int) $datos['user_id'],
             (int) $datos['libro_id'],
-            $datos['rol'],
+            (string) $usuario->rol,
             $datos['fecha_prestamo']
         );
 
         return view('prestamos.index', $this->datosVista([
             'resultadoRegistro' => $resultado,
-            'datosRegistro' => $datos,
+            'datosRegistro' => array_merge($datos, ['rol' => $usuario->rol]),
         ]));
     }
 
@@ -104,45 +105,16 @@ class PrestamoController extends Controller
             return array_merge([
                 'usuarios' => collect(),
                 'libros' => collect(),
+                'librosDisponibles' => collect(),
+                'prestamos' => collect(),
                 'tablasDisponibles' => false,
             ], $extra);
-        }
-
-        if (!User::where('rol', 'estudiante')->exists()) {
-            User::create([
-                'name' => 'Juan Estudiante',
-                'email' => 'juan.demo@bibliotech.test',
-                'password' => 'password',
-                'rol' => 'estudiante',
-            ]);
-        }
-
-        if (!User::where('rol', 'docente')->exists()) {
-            User::create([
-                'name' => 'Ana Docente',
-                'email' => 'ana.demo@bibliotech.test',
-                'password' => 'password',
-                'rol' => 'docente',
-            ]);
-        }
-
-        if (!Libro::where('estado', 'DISPONIBLE')->exists()) {
-            Libro::create([
-                'titulo' => 'Programacion en PHP',
-                'estado' => 'DISPONIBLE',
-            ]);
-        }
-
-        if (!Libro::where('estado', 'PRESTADO')->exists()) {
-            Libro::create([
-                'titulo' => 'Base de Datos con MySQL',
-                'estado' => 'PRESTADO',
-            ]);
         }
 
         return array_merge([
             'usuarios' => User::whereIn('rol', ['estudiante', 'docente'])->orderBy('name')->get(),
             'libros' => Libro::orderBy('id')->get(),
+            'librosDisponibles' => Libro::where('estado', 'DISPONIBLE')->orderBy('titulo')->get(),
             'prestamos' => Prestamo::with(['user', 'libro'])->orderByDesc('id')->get(),
             'tablasDisponibles' => true,
             'mensaje' => session('mensaje'),

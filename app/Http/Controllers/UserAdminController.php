@@ -12,8 +12,8 @@ class UserAdminController extends Controller
     public function index()
     {
         return view('admin.usuarios.index', [
-            'usuarios' => User::whereIn('rol', ['admin', 'editor', 'visualizador'])
-                ->orderBy('name')
+            'usuarios' => User::with(['prestamos', 'pagos'])
+                ->orderByDesc('id')
                 ->get(),
             'mensaje' => session('mensaje'),
         ]);

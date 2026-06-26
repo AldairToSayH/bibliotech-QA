@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'BiblioTech - Panel de Pruebas')
-@section('section-title', 'Panel de Pruebas')
+@section('title', 'BiblioTech - Panel QA')
+@section('section-title', 'Panel QA')
 
 @section('content')
     @php
@@ -16,7 +16,7 @@
     @endphp
 
     <section class="panel">
-        <h1 class="page-title">Panel de Pruebas BiblioTech</h1>
+        <h1 class="page-title">Panel QA BiblioTech</h1>
         <p class="page-description">
             Resumen visual de los CP01-CP21 implementados con PHPUnit para validar calidad de software.
         </p>

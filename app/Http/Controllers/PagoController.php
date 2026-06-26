@@ -121,39 +121,6 @@ class PagoController extends Controller
             ], $extra);
         }
 
-        $usuario = User::firstOrCreate(
-            ['email' => 'carlos.pagos@bibliotech.test'],
-            [
-                'name' => 'Carlos Docente',
-                'password' => 'password',
-                'rol' => 'docente',
-            ]
-        );
-
-        $libroVencido = Libro::firstOrCreate(
-            ['titulo' => 'Ingenieria de Software'],
-            ['estado' => 'PRESTADO']
-        );
-
-        Prestamo::firstOrCreate(
-            [
-                'user_id' => $usuario->id,
-                'libro_id' => $libroVencido->id,
-                'fecha_devolucion' => '2026-06-15',
-            ],
-            [
-                'fecha_prestamo' => '2026-06-01',
-                'estado' => 'VENCIDO',
-            ]
-        );
-
-        if (!Libro::where('estado', 'DISPONIBLE')->exists()) {
-            Libro::create([
-                'titulo' => 'Arquitectura de Software',
-                'estado' => 'DISPONIBLE',
-            ]);
-        }
-
         return array_merge([
             'usuarios' => User::whereIn('rol', ['estudiante', 'docente'])->orderBy('name')->get(),
             'prestamos' => Prestamo::with(['user', 'libro'])->orderByDesc('id')->get(),
